@@ -1,4 +1,4 @@
-/*! @mainpage Template
+/*! @mainpage Guia 1 Ejercicio 3
  *
  * @section Ejercicio 3- Guia 1
  *
@@ -24,7 +24,8 @@
  *
  * |   Date	    | Description                                    |
  * |:----------:|:-----------------------------------------------|
- * | 21/03/2025 | Document creation		                         |
+ * | 21/03/2025 | Creacion del documento                         |
+ * | 11/04/2025 | Correccion de la documentacion                 |
  *
  * @author Aldana Gagliardi
  *
