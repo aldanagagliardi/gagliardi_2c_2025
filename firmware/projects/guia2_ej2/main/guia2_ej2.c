@@ -53,8 +53,8 @@
 /*==================[macros and definitions]=================================*/
 
 /** @def CONFIG_BLINK_PERIOD_MEDICION_uS
- *  @brief Tiempo de espera en ms para la lectura, escritura de las mediciones en LCD 
- *         y actualizacion de los LEDS
+ *  @brief Tiempo de espera para la lectura, escritura de las mediciones en LCD 
+ *         y actualizacion de los LEDS, en ms
  */
 #define CONFIG_BLINK_PERIOD_MEDICION_uS 1000000
 
@@ -80,25 +80,25 @@ TaskHandle_t mostrar_task_handle = NULL;
 
 /*==================[internal functions declaration]=========================*/
 
-/** @fn FuncTimerA
+/** @fn TimerA
  * @brief Timer que controla la Tarea- Medicion */
-void FuncTimerA(void* parametro){
+void TimerA(void* parametro){
     /* Envía una notificación a la tarea asociada a medir */
 	vTaskNotifyGiveFromISR(medir_task_handle, pdFALSE);    
 }
 
-/** @fn FuncTimerB
+/** @fn TimerB
  * @brief Timer que controla la Tarea- Mostrar */
- void FuncTimerB(void* parametro){
+ void TimerB(void* parametro){
     vTaskNotifyGiveFromISR(mostrar_task_handle, pdFALSE);   
 	/* Envía una notificación a la tarea asociada a mostar  */
 }
 
-/** @fn controlarLeds 
+/** @fn controlarLEDS
  * @brief Funcion que controla los LEDS 1,2 y 3
 */
 
-void controlarLeds(void)
+void controlarLEDS(void)
 {
 	if (valor_medicion < 10)
 	{
@@ -165,7 +165,7 @@ static void mostrar(void *parametro)
 
 		if (medir)
 		{
-			controlarLeds();
+			controlarLEDS();
 			if (!hold)
 			{
 				LcdItsE0803Write(valor_medicion);
@@ -212,7 +212,7 @@ void app_main(void){
 	timer_config_t timer_medicion = {
         .timer = TIMER_A,
         .period = CONFIG_BLINK_PERIOD_MEDICION_uS,
-        .func_p = FuncTimerA,
+        .func_p = TimerA,
         .param_p = NULL
     };
     TimerInit(&timer_medicion);
@@ -220,7 +220,7 @@ void app_main(void){
     timer_config_t timer_mostrar = {
         .timer = TIMER_B,
         .period = CONFIG_BLINK_PERIOD_MEDICION_uS,
-        .func_p = FuncTimerB,
+        .func_p = TimerB,
         .param_p = NULL
     };
 	TimerInit(&timer_mostrar);

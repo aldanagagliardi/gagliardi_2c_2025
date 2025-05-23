@@ -26,15 +26,16 @@
  *
  * |  Display LCD   |   ESP32   	|
  * |:--------------:|:--------------|
+ * | 	SEL_1	    | 	GPIO_19  	|
+ * | 	SEL_2	    | 	GPIO_18  	|
+ * | 	SEL_3     	|  	GPIO_9  	|
  * | 	D1	     	| 	GPIO_20		|
  * | 	D2	     	| 	GPIO_21  	|
  * | 	D3 	     	| 	GPIO_22  	|
  * | 	D4	     	| 	GPIO_23  	|
- * | 	SEL_1	    | 	GPIO_19  	|
- * | 	SEL_2	    | 	GPIO_18  	|
- * | 	SEL_3     	|  	GPIO_9  	|
  * | 	+5V	     	| 	+5V    		|
  * | 	GND	     	| 	GND    		|
+ * 
  * 
  * |    HC-SR04     |   ESP32   	|
  * |:--------------:|:--------------|
@@ -76,25 +77,25 @@
 
 /*==================[internal data definition]===============================*/
 /** @def hold
- * @brief Variable global que indica si se debe mantener la ultima medicion en LCD 
+ * @brief Variable para indicar si se debe mantener la ultima medicion en LCD 
  */
 bool hold = false;
 
 /** @def medir
- * @brief Variable global que indica si se realizaran las mediciones 
+ * @brief Variable para indicar si se realizaran las mediciones 
  */
 bool medir = false;
 
 /** @def valor_medicion
- *  @brief Variable global para registrar los velores medidos  
+ *  @brief Variable para registrar los valores medidos  
  */
 uint16_t valor_medicion = 0;
 
 /*==================[internal functions declaration]=========================*/
-/** @fn controlarLeds 
+/** @fn controlarLEDS
  * @brief Funcion que controla los LEDS 1,2 y 3
 */
-void controlarLeds(void)
+void controlarLEDS(void)
 {
 	if (valor_medicion < 10)
 	{
@@ -133,7 +134,7 @@ void controlarLeds(void)
 }
 
 /** @fn medicion
- * @brief Tarea- se encarga de medir la distancia a partir del sensor
+ * @brief Tarea-se encarga de medir la distancia a partir del sensor
  */
 
 static void medicion(void *parametro)
@@ -159,7 +160,7 @@ static void mostrar(void *parametro)
 	{
 		if (medir)
 		{
-			controlarLeds();
+			controlarLEDS();
 			if (!hold)
 			{
 				LcdItsE0803Write(valor_medicion);

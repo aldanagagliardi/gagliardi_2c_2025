@@ -87,29 +87,29 @@ TaskHandle_t mostrar_task_handle = NULL;
 
 /*==================[internal functions declaration]=========================*/
 
-/** @fn FuncTimerA
+/** @fn TimerA
  * @brief Timer que controla la Tarea- Medicion */
 
-void FuncTimerA(void *parametro)
+void TimerA(void *parametro)
 {
 	vTaskNotifyGiveFromISR(medir_task_handle, pdFALSE);
 	/* Envía una notificación a la tarea asociada a medir */
 }
 
-/** @fn FuncTimerB
+/** @fn TimerB
  * @brief Timer que controla la Tarea- Mostrar */
 
-void FuncTimerB(void *parametro)
+void TimerB(void *parametro)
 {
 	vTaskNotifyGiveFromISR(mostrar_task_handle, pdFALSE);
 	/* Notifica a la tarea asociada a mostar  */
 }
 
-/** @fn controlarLeds
+/** @fn controlarLEDS
  * @brief Funcion que controla los LEDS 1, 2 y 3
  * */
 
-void controlarLeds(void)
+void controlarLEDS(void)
 {
 	if (valor_medicion < 10)
 	{
@@ -219,14 +219,14 @@ void app_main(void)
 	timer_config_t timer_medicion = {
 		.timer = TIMER_A,
 		.period = CONFIG_BLINK_PERIOD_MEDICION_uS,
-		.func_p = FuncTimerA,
+		.func_p = TimerA,
 		.param_p = NULL};
 	TimerInit(&timer_medicion);
 
 	timer_config_t timer_mostrar = {
 		.timer = TIMER_B,
 		.period = CONFIG_BLINK_PERIOD_MEDICION_uS,
-		.func_p = FuncTimerB,
+		.func_p = TimerB,
 		.param_p = NULL};
 	TimerInit(&timer_mostrar);
 
