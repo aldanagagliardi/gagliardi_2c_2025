@@ -2,28 +2,27 @@
  *
  * @section genDesc General Description
  *
- * Diseñar el firmware modelando con un diagrama de flujo de manera que cumpla con las siguientes funcionalidades:
+ * Enunciado
+ * Ejercicio 1 de la Guia Proyecto 2
+ * Diseñar el firmware modelando con un diagrama de flujo de manera que cumpla 
+ * con las siguientes funcionalidades:
 
  * Mostrar distancia medida utilizando los leds de la siguiente manera:
- * Si la distancia es menor a 10 cm, apagar todos los LEDs.
- * Si la distancia está entre 10 y 20 cm, encender el LED_1.
- * Si la distancia está entre 20 y 30 cm, encender el LED_2 y LED_1.
- * Si la distancia es mayor a 30 cm, encender el LED_3, LED_2 y LED_1.
+ * -Si la distancia es menor a 10 cm, apagar todos los LEDs.
+ * -Si la distancia está entre 10 y 20 cm, encender el LED_1.
+ * -Si la distancia está entre 20 y 30 cm, encender el LED_2 y LED_1.
+ * -Si la distancia es mayor a 30 cm, encender el LED_3, LED_2 y LED_1.
 
  * Mostrar el valor de distancia en cm utilizando el display LCD.
- * Usar TEC1 para activar y detener la medición.
- * Usar TEC2 para mantener el resultado (“HOLD”).
- * Refresco de medición: 1 s
- * Se deberá conectar a la EDU-ESP un sensor de ultrasonido HC-SR04 y una pantalla LCD y utilizando los drivers provistos por la cátedra implementar la aplicación correspondiente. Se debe subir al repositorio el código. Se debe incluir en la documentación, realizada con doxygen, el diagrama de flujo. 
+ * -Usar TEC1 para activar y detener la medición.
+ * -Usar TEC2 para mantener el resultado (“HOLD”).
+ * -Refresco de medición: 1 s
+ * Se deberá conectar a la EDU-ESP un sensor de ultrasonido HC-SR04 y una pantalla LCD 
+ * y utilizando los drivers provistos por la cátedra implementar la aplicación correspondiente. 
+ * Se debe subir al repositorio el código. Se debe incluir en la documentación, 
+ * realizada con doxygen, el diagrama de flujo. 
  *
  * @section hardConn Hardware Connection
- *
- * |    HC-SR04     |   ESP32   	|
- * |:--------------:|:--------------|
- * | 	ECHO	 	| 	GPIO_3		|
- * | 	TRIGGER	 	| 	GPIO_2		|
- * | 	+5V  	 	| 	+5V	    	|
- * | 	GND 	 	| 	GND	    	|
  *
  * |  Display LCD   |   ESP32   	|
  * |:--------------:|:--------------|
@@ -36,7 +35,13 @@
  * | 	SEL_3     	|  	GPIO_9  	|
  * | 	+5V	     	| 	+5V    		|
  * | 	GND	     	| 	GND    		|
- *
+ * 
+ * |    HC-SR04     |   ESP32   	|
+ * |:--------------:|:--------------|
+ * | 	ECHO	 	| 	GPIO_3		|
+ * | 	TRIGGER	 	| 	GPIO_2		|
+ * | 	+5V  	 	| 	+5V	    	|
+ * | 	GND 	 	| 	GND	    	|
  *
  * @section changelog Changelog
  *
@@ -52,11 +57,10 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "gpio_mcu.h"
 #include "led.h"
 #include "switch.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 #include "gpio_mcu.h"
 #include "hc_sr04.h"
 #include "lcditse0803.h"
@@ -64,46 +68,32 @@
 
 /*==================[macros and definitions]=================================*/
 
-/** @def PERDIOD_MEDICION
- *  @brief Tiempo de espera (ms) para la lectura, escritura de las mediciones en LCD y actualizacion de los LEDS
+/** @def CONFIG_BLINK_PERDIOD_MEDICION_uS
+ *  @brief Tiempo de espera para la lectura, 
+ * 			escritura de las mediciones en LCD y actualizacion de los LEDS, en ms
  */
 #define CONFIG_BLINK_PERIOD_MEDICION_uS 1000000
 
 /*==================[internal data definition]===============================*/
 /** @def hold
- * @brief Variable global de tipo booleana que indica si se debe mantener la ultima medicion en LCD */
+ * @brief Variable global que indica si se debe mantener la ultima medicion en LCD 
+ */
 bool hold = false;
 
 /** @def medir
- * @brief Variable global de tipo booleana que indica si se realizaran las mediciones */
+ * @brief Variable global que indica si se realizaran las mediciones 
+ */
 bool medir = false;
 
 /** @def valor_medicion
- *  @brief Variable global de tipo entero sin signo para registrar los velores medidos  */
+ *  @brief Variable global para registrar los velores medidos  
+ */
 uint16_t valor_medicion = 0;
 
-
-TaskHandle_t medir_task_handle = NULL;
-TaskHandle_t mostrar_task_handle = NULL;
-
 /*==================[internal functions declaration]=========================*/
-/** @fn FuncTimerA (void *parametro)
- * @brief timer que se encarga de controlar la tarea medicion */
-
-void FuncTimerA(void* parametro){
-    vTaskNotifyGiveFromISR(medir_task_handle, pdFALSE);    /* Envía una notificación a la tarea asociada a medir */
-}
-
-/** @fn FuncTimerB (void *parametro)
- * @brief timer que se encarga de controlar la tarea mostrar en pantalla */
-
- void FuncTimerB(void* parametro){
-    vTaskNotifyGiveFromISR(mostrar_task_handle, pdFALSE);    /* Envía una notificación a la tarea asociada a mostar  */
-}
-
-/** @fn controlarLeds (void)
- * @brief funcion encargada de controlar los leds*/
-
+/** @fn controlarLeds 
+ * @brief Funcion que controla los LEDS 1,2 y 3
+*/
 void controlarLeds(void)
 {
 	if (valor_medicion < 10)
@@ -142,33 +132,31 @@ void controlarLeds(void)
 	}
 }
 
-/** @fn medicion (void *parametro)
- * @brief tarea encargada de medir la distancia a partir del sensor*/
+/** @fn medicion
+ * @brief Tarea- se encarga de medir la distancia a partir del sensor
+ */
 
 static void medicion(void *parametro)
 {
 	while (true)
 	{
-		ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-
 		if (medir == true)
 		{
 			valor_medicion = HcSr04ReadDistanceInCentimeters(); // lector del sensor
 		}
-
+		vTaskDelay(CONFIG_BLINK_PERIOD_MEDICION_uS / portTICK_PERIOD_MS);
 	
 	}
 }
 
-/** @fn mostrar (void *parametro)
- * @brief tarea encargada de mostrar por pantalla la distancia medida por el sensor*/
+/** @fn mostrar 
+ * @brief Tarea- se encarga de mostrar por pantalla la distancia que mide el sensor
+ */
 
 static void mostrar(void *parametro)
 {
 	while (true)
 	{
-		ulTaskNotifyTake(pdTRUE, portMAX_DELAY);  
-
 		if (medir)
 		{
 			controlarLeds();
@@ -184,23 +172,37 @@ static void mostrar(void *parametro)
 			LedOff(LED_2);
 			LedOff(LED_3);
 		}
-		
+		vTaskDelay(CONFIG_BLINK_PERIOD_MEDICION_uS / portTICK_PERIOD_MS);
+		//VER EL ERROR 
 	}
 	
 }
 
-/** @fn tecla_1 (void *parametro)
- * @brief funcion que se encarga de controlar la tecla 1 */
-void tecla_1 ()
-{
-		medir = !medir;
-}
+/** @fn teclas 
+ * @brief tarea que se encarga de controlar las acciones por tecla */
 
-/** @fn tecla_2 (void *parametro)
- * @brief funcion que se encarga de controlar la tecla 2 */
-void tecla_2 ()
+static void teclas(void *parametro)
 {
-		hold = !hold;
+	uint8_t tecla;
+	while (true)
+	{
+		tecla = SwitchesRead();
+
+		switch (tecla)
+		{
+		case SWITCH_1:
+			medir = !medir;
+
+			break;
+
+		case SWITCH_2:
+			hold = !hold;
+
+			break;
+		}
+		vTaskDelay(CONFIG_BLINK_PERIOD_MEDICION_uS / portTICK_PERIOD_MS);
+	}
+
 }
 
 /*==================[external functions definition]==========================*/
@@ -211,31 +213,10 @@ void app_main(void)
 	LedsInit();
 	HcSr04Init(GPIO_3, GPIO_2);
 	SwitchesInit();
-	SwitchActivInt(SWITCH_1, tecla_1, NULL);
-	SwitchActivInt(SWITCH_2, tecla_2, NULL);
-
-	timer_config_t timer_medicion = {
-        .timer = TIMER_A,
-        .period = CONFIG_BLINK_PERIOD_MEDICION_uS,
-        .func_p = FuncTimerA,
-        .param_p = NULL
-    };
-    TimerInit(&timer_medicion);
-
-    timer_config_t timer_mostrar = {
-        .timer = TIMER_B,
-        .period = CONFIG_BLINK_PERIOD_MEDICION_uS,
-        .func_p = FuncTimerB,
-        .param_p = NULL
-    };
-	TimerInit(&timer_mostrar);
-
+	
 	/* Creacion de las tareas teclas mostrar y medicion */
-	xTaskCreate(&mostrar, "mostrar", 2048, NULL, 5, &mostrar_task_handle);
-	xTaskCreate(&medicion, "medir", 2048, NULL, 5, &medir_task_handle);
-
-	/* Inicio los timers */
-	TimerStart(timer_medicion.timer);
-    TimerStart(timer_mostrar.timer);
+	xTaskCreate(&teclas, "teclas", 2048, NULL, 5, NULL);
+	xTaskCreate(&mostrar, "mostrar", 2048, NULL, 5, NULL);
+	xTaskCreate(&medicion, "medir", 2048, NULL, 5, NULL);
 }
 /*==================[end of file]============================================*/

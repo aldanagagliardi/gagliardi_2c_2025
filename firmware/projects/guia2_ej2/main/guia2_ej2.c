@@ -1,5 +1,6 @@
 /*! @mainpage Guia 2 Ejercicio 2
  * @section genDesc General Description
+ * Enunciado 
  * Ejercicio 2 de la Guia Proyecto 2
  * Cree un nuevo proyecto en el que modifique la actividad del punto 1 de manera de utilizar
  * interrupciones para el control de las teclas y el control de tiempos (Timers). 
@@ -27,9 +28,10 @@
  * 
  * @section changelog Changelog
  *
- * |   Date	    | Description                                    |
- * |:----------:|:-----------------------------------------------|
- * | 9/05/2025  | Creacion del documento                         |
+ * |   Date	    | Description                    |
+ * |:----------:|:-------------------------------|
+ * | 25/04/2025 | Creacion del documento         |
+ * | 9/05/2025	| Resolucion de errores          |
  *
  * @author Aldana Gagliardi 
  */
@@ -48,11 +50,10 @@
 #include "lcditse0803.h"
 #include "timer_mcu.h"
 
-
 /*==================[macros and definitions]=================================*/
 
-/** @def PERDIOD_MEDICION
- *  @brief Tiempo de espera (ms) para la lectura, escritura de las mediciones en LCD 
+/** @def CONFIG_BLINK_PERIOD_MEDICION_uS
+ *  @brief Tiempo de espera en ms para la lectura, escritura de las mediciones en LCD 
  *         y actualizacion de los LEDS
  */
 #define CONFIG_BLINK_PERIOD_MEDICION_uS 1000000
@@ -60,17 +61,17 @@
 /*==================[internal data definition]===============================*/
 
 /** @def hold
- * @brief Variable global de tipo booleana que indica si se debe mantener la ultima medicion en LCD 
+ * @brief Variable global que indica si se debe mantener la ultima medicion en LCD 
 */
 bool hold = false;
 
 /** @def medir
- * @brief Variable global de tipo booleana que indica si se realizaran las mediciones 
+ * @brief Variable global que indica si se realizaran las mediciones 
 */
 bool medir = false;
 
 /** @def valor_medicion
- *  @brief Variable global de tipo entero sin signo para registrar los velores medidos  
+ *  @brief Variable global para registrar los velores medidos  
 */
 uint16_t valor_medicion = 0;
 
@@ -78,22 +79,24 @@ TaskHandle_t medir_task_handle = NULL;
 TaskHandle_t mostrar_task_handle = NULL;
 
 /*==================[internal functions declaration]=========================*/
-/** @fn FuncTimerA (void *parametro)
- * @brief timer que se encarga de controlar la tarea medicion */
 
+/** @fn FuncTimerA
+ * @brief Timer que controla la Tarea- Medicion */
 void FuncTimerA(void* parametro){
-    vTaskNotifyGiveFromISR(medir_task_handle, pdFALSE);    /* Envía una notificación a la tarea asociada a medir */
+    /* Envía una notificación a la tarea asociada a medir */
+	vTaskNotifyGiveFromISR(medir_task_handle, pdFALSE);    
 }
 
-/** @fn FuncTimerB (void *parametro)
- * @brief timer que se encarga de controlar la tarea mostrar en pantalla */
-
+/** @fn FuncTimerB
+ * @brief Timer que controla la Tarea- Mostrar */
  void FuncTimerB(void* parametro){
-    vTaskNotifyGiveFromISR(mostrar_task_handle, pdFALSE);    /* Envía una notificación a la tarea asociada a mostar  */
+    vTaskNotifyGiveFromISR(mostrar_task_handle, pdFALSE);   
+	/* Envía una notificación a la tarea asociada a mostar  */
 }
 
-/** @fn controlarLeds (void)
- * @brief funcion encargada de controlar los leds*/
+/** @fn controlarLeds 
+ * @brief Funcion que controla los LEDS 1,2 y 3
+*/
 
 void controlarLeds(void)
 {
@@ -132,8 +135,9 @@ void controlarLeds(void)
 		}
 	}
 }
-/** @fn medicion (void *parametro)
- * @brief tarea encargada de medir la distancia a partir del sensor*/
+/** @fn medicion 
+ * @brief Tarea- se encarga de medir la distancia a partir del sensor
+*/
 
 static void medicion(void *parametro)
 {
@@ -150,9 +154,9 @@ static void medicion(void *parametro)
 	}
 }
 
-/** @fn mostrar (void *parametro)
- * @brief tarea encargada de mostrar por pantalla la distancia medida por el sensor*/
-
+/** @fn mostrar
+ * @brief Tarea- se encarga de mostrar por pantalla la distancia que mide el sensor
+ */
 static void mostrar(void *parametro)
 {
 	while (true)
@@ -178,15 +182,17 @@ static void mostrar(void *parametro)
 	}
 	
 }
-/** @fn tecla_1 (void *parametro)
- * @brief funcion que se encarga de controlar la tecla 1 */
+/** @fn tecla_1 
+ * @brief Controla la tecla 1 
+ */
 void tecla_1 ()
 {
 		medir = !medir;
 }
 
-/** @fn tecla_2 (void *parametro)
- * @brief funcion que se encarga de controlar la tecla 2 */
+/** @fn tecla_2
+ * @brief Controla la tecla 2 
+ */
 void tecla_2 ()
 {
 		hold = !hold;
@@ -195,7 +201,7 @@ void tecla_2 ()
 
 /*==================[external functions definition]==========================*/
 void app_main(void){
-	/* Inicialización de LCD, Leds, Sensor de Ultrasonido (configuracion de pines) y Switchs */
+	/* Inicialización de LCD, Leds, Sensor de Ultrasonido y Switchs */
 	LcdItsE0803Init();
 	LedsInit();
 	HcSr04Init(GPIO_3, GPIO_2);
