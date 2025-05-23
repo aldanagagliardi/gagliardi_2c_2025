@@ -31,11 +31,11 @@
  *
  * @section changelog Changelog
  *
- * |   Date	    | Description                            |
- * |:----------:|:---------------------------------------|
- * | 9/05/2025  | Creacion del documento                 |
- * | 9/05/2025  | Agrego la parte de la UART al codigo   |
- *              |             del ejercicio 2            |
+ * |   Date	    | Description                        |
+ * |:----------:|:-----------------------------------|
+ * | 9/05/2025  | Creacion del documento             |
+ * | 9/05/2025  | Agrego el codigo de la UART        |
+ * | 23/5/2025  | Compruebo el funcionamiento        |
  *
  * @author Aldana Gagliardi
  */
@@ -66,24 +66,23 @@
 /*==================[internal data definition]===============================*/
 
 /** @def hold
- *  @brief Variable global que indica si se debe mantener la ultima medicion en LCD
+ *  @brief Variable que indica si se debe mantener la ultima medicion en LCD
  */
 bool hold = false;
 
 /** @def medir
- * @brief Variable global que indica si se realizaran las mediciones
+ * @brief Variable que indica si se realizaran las mediciones
  */
 bool medir = false;
 
 /** @def valor_medicion
- *  @brief Variable global para registrar los velores medidos
+ *  @brief Variable para registrar los velores medidos
  */
 uint16_t valor_medicion = 0;
 
 TaskHandle_t medir_task_handle = NULL;
 TaskHandle_t mostrar_task_handle = NULL;
 
- //TaskHandle_t uart_task_handle = NULL;
 
 /*==================[internal functions declaration]=========================*/
 
@@ -147,8 +146,8 @@ void controlarLEDS(void)
 }
 
 /** @fn medicion
- * @brief Tarea- se encarga de medir la distancia a partir del sensor
- * */
+ * @brief Tarea-se encarga de medir la distancia a partir del sensor
+ */
 
 static void medicion(void *parametro)
 {
@@ -164,7 +163,7 @@ static void medicion(void *parametro)
 }
 
 /** @fn mostrar
- * @brief Tarea- se encarga de mostrar por pantalla la distancia que mide el sensor
+ * @brief Tarea-se encarga de mostrar por pantalla la distancia que mide el sensor
  */
 
 static void mostrar(void *parametro)
@@ -192,16 +191,16 @@ static void mostrar(void *parametro)
 		UartSendString(UART_PC, " cm \r\n");
 	}
 }
-/** @fn tecla_1
+/** @fn tecla1
  * @brief Controla la tecla 1 */
-void tecla_1()
+void tecla1()
 {
 	medir = !medir;
 }
 
-/** @fn tecla_2
+/** @fn tecla2
  * @brief Controla la tecla 2 */
-void tecla_2()
+void tecla2()
 {
 	hold = !hold;
 }
@@ -213,8 +212,8 @@ void app_main(void)
 	LedsInit();
 	HcSr04Init(GPIO_3, GPIO_2);
 	SwitchesInit();
-	SwitchActivInt(SWITCH_1, tecla_1, NULL);
-	SwitchActivInt(SWITCH_2, tecla_2, NULL);
+	SwitchActivInt(SWITCH_1, tecla1, NULL);
+	SwitchActivInt(SWITCH_2, tecla2, NULL);
 
 	timer_config_t timer_medicion = {
 		.timer = TIMER_A,

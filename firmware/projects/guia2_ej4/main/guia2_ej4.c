@@ -50,8 +50,8 @@
 /*==================[macros and definitions]=================================*/
 
 /** @def CONFIG_BLINK_PERIOD_MEDICION_uS
- *  @brief Tiempo de espera en ms para la lectura, escritura de las mediciones en el LCD
- *         y actualizacion de los LEDS
+ *  @brief Tiempo de espera para la lectura, escritura de las mediciones en el LCD
+ *         y actualizacion de los LEDS, en ms 
  */
 #define CONFIG_BLINK_PERIOD_MEDICION_uS 2000
 

@@ -46,9 +46,10 @@
  *
  * @section changelog Changelog
  *
- * |   Date	    | Description                                    |
- * |:----------:|:-----------------------------------------------|
- * | 9 /05/2025 | Creacion del documento                         |
+ * |   Date	    | Description                       |
+ * |:----------:|:----------------------------------|
+ * | 9 /05/2025 | Creacion del documento            |
+ * | 23/05/2025 | Chequeo el funcionamiento 		|
  *
  * @author Aldana Gagliardi
  *
