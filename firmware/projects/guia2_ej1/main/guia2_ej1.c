@@ -39,10 +39,11 @@
  * 
  * |    HC-SR04     |   ESP32   	|
  * |:--------------:|:--------------|
+ * | 	GND 	 	| 	GND	    	|
  * | 	ECHO	 	| 	GPIO_3		|
  * | 	TRIGGER	 	| 	GPIO_2		|
  * | 	+5V  	 	| 	+5V	    	|
- * | 	GND 	 	| 	GND	    	|
+
  *
  * @section changelog Changelog
  *
@@ -87,10 +88,10 @@ bool hold = false;
  */
 bool medir = false;
 
-/** @def valor_medicion
+/** @def valorMedido
  *  @brief Variable para registrar los valores medidos  
  */
-uint16_t valor_medicion = 0;
+uint16_t valorMedido= 0;
 
 /*==================[internal functions declaration]=========================*/
 /** @fn controlarLEDS
@@ -98,7 +99,7 @@ uint16_t valor_medicion = 0;
 */
 void controlarLEDS(void)
 {
-	if (valor_medicion < 10)
+	if (valorMedido < 10)
 	{
 		LedOff(LED_1);
 		LedOff(LED_2);
@@ -106,7 +107,7 @@ void controlarLEDS(void)
 	}
 	else
 	{
-		if (valor_medicion > 10 && valor_medicion < 20)
+		if (valorMedido > 10 && valorMedido < 20)
 		{
 			LedOn(LED_1);
 			LedOff(LED_2);
@@ -114,7 +115,7 @@ void controlarLEDS(void)
 		}
 		else
 		{
-			if (valor_medicion > 20 && valor_medicion < 30)
+			if (valorMedido > 20 && valorMedido < 30)
 			{
 				LedOn(LED_1);
 				LedOn(LED_2);
@@ -123,7 +124,7 @@ void controlarLEDS(void)
 
 			else
 			{
-				if (valor_medicion > 30)
+				if (valorMedido > 30)
 				{
 					LedOn(LED_1);
 					LedOn(LED_2);
@@ -135,7 +136,7 @@ void controlarLEDS(void)
 }
 
 /** @fn medicion
- * @brief Tarea-se encarga de medir la distancia a partir del sensor
+ * @brief Mide la distancia a partir del sensor. Es una tarea
  */
 
 static void medicion(void *parametro)
@@ -144,7 +145,7 @@ static void medicion(void *parametro)
 	{
 		if (medir == true)
 		{
-			valor_medicion = HcSr04ReadDistanceInCentimeters(); // lector del sensor
+			valorMedido = HcSr04ReadDistanceInCentimeters(); // lector del sensor
 		}
 		vTaskDelay(CONFIG_BLINK_PERIOD_MEDICION_uS / portTICK_PERIOD_MS);
 	
@@ -152,7 +153,7 @@ static void medicion(void *parametro)
 }
 
 /** @fn mostrar 
- * @brief Tarea- se encarga de mostrar por pantalla la distancia que mide el sensor
+ * @brief Muestra por pantalla la distancia que mide el sensor. Es una tarea
  */
 
 static void mostrar(void *parametro)
@@ -164,7 +165,7 @@ static void mostrar(void *parametro)
 			controlarLEDS();
 			if (!hold)
 			{
-				LcdItsE0803Write(valor_medicion);
+				LcdItsE0803Write(valorMedido);
 			}
 		}
 		else
@@ -175,13 +176,13 @@ static void mostrar(void *parametro)
 			LedOff(LED_3);
 		}
 		vTaskDelay(CONFIG_BLINK_PERIOD_MEDICION_uS / portTICK_PERIOD_MS);
-		//VER EL ERROR 
+
 	}
 	
 }
 
 /** @fn teclas 
- * @brief tarea que se encarga de controlar las acciones por tecla */
+ * @brief Tarea-se encarga de controlar las acciones por tecla */
 
 static void teclas(void *parametro)
 {
@@ -210,13 +211,13 @@ static void teclas(void *parametro)
 /*==================[external functions definition]==========================*/
 void app_main(void)
 {
-/* Inicialización de LCD, Leds, Sensor de Ultrasonido (configuracion de pines) y Switchs */
+	/* Inicialización de el LCD, Leds, Sensor de Ultrasonido y Switch */
 	LcdItsE0803Init();
 	LedsInit();
 	HcSr04Init(GPIO_3, GPIO_2);
 	SwitchesInit();
 	
-	/* Creacion de las tareas teclas mostrar y medicion */
+	/* Se crean las tareas teclas, mostrar y medicion */
 	xTaskCreate(&teclas, "teclas", 2048, NULL, 5, NULL);
 	xTaskCreate(&mostrar, "mostrar", 2048, NULL, 5, NULL);
 	xTaskCreate(&medicion, "medir", 2048, NULL, 5, NULL);

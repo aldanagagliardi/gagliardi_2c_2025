@@ -75,10 +75,10 @@ bool hold = false;
  */
 bool medir = false;
 
-/** @def valor_medicion
+/** @def valorMedido
  *  @brief Variable para registrar los velores medidos
  */
-uint16_t valor_medicion = 0;
+uint16_t valorMedido = 0;
 
 TaskHandle_t medir_task_handle = NULL;
 TaskHandle_t mostrar_task_handle = NULL;
@@ -106,11 +106,11 @@ void TimerB(void *parametro)
 
 /** @fn controlarLEDS
  * @brief Funcion que controla los LEDS 1, 2 y 3
- * */
+ */
 
 void controlarLEDS(void)
 {
-	if (valor_medicion < 10)
+	if (valorMedido < 10)
 	{
 		LedOff(LED_1);
 		LedOff(LED_2);
@@ -118,7 +118,7 @@ void controlarLEDS(void)
 	}
 	else
 	{
-		if (valor_medicion > 10 && valor_medicion < 20)
+		if (valorMedido> 10 && valorMedido < 20)
 		{
 			LedOn(LED_1);
 			LedOff(LED_2);
@@ -126,7 +126,7 @@ void controlarLEDS(void)
 		}
 		else
 		{
-			if (valor_medicion > 20 && valor_medicion < 30)
+			if (valorMedido > 20 && valorMedido< 30)
 			{
 				LedOn(LED_1);
 				LedOn(LED_2);
@@ -134,7 +134,7 @@ void controlarLEDS(void)
 			}
 			else
 			{
-				if (valor_medicion > 30)
+				if (valorMedido > 30)
 				{
 					LedOn(LED_1);
 					LedOn(LED_2);
@@ -145,9 +145,9 @@ void controlarLEDS(void)
 	}
 }
 
-/** @fn medicion
- * @brief Tarea-se encarga de medir la distancia a partir del sensor
- */
+/** @fn medicion 
+ * @brief Mide la distancia a partir del sensor. Es una tarea
+*/
 
 static void medicion(void *parametro)
 {
@@ -157,13 +157,13 @@ static void medicion(void *parametro)
 
 		if (medir == true)
 		{
-			valor_medicion = HcSr04ReadDistanceInCentimeters(); // lector del sensor
+			valorMedido = HcSr04ReadDistanceInCentimeters(); // lector del sensor
 		}
 	}
 }
 
 /** @fn mostrar
- * @brief Tarea-se encarga de mostrar por pantalla la distancia que mide el sensor
+ * @brief Muestra por pantalla la distancia que mide el sensor. Es una tarea
  */
 
 static void mostrar(void *parametro)
@@ -177,7 +177,7 @@ static void mostrar(void *parametro)
 			controlarLeds();
 			if (!hold)
 			{
-				LcdItsE0803Write(valor_medicion);
+				LcdItsE0803Write(valorMedido);
 			}
 		}
 		else
@@ -187,7 +187,7 @@ static void mostrar(void *parametro)
 			LedOff(LED_2);
 			LedOff(LED_3);
 		}
-		UartSendString(UART_PC, (char *)UartItoa(valor_medicion, 10));
+		UartSendString(UART_PC, (char *)UartItoa(valorMedido, 10));
 		UartSendString(UART_PC, " cm \r\n");
 	}
 }
@@ -229,11 +229,11 @@ void app_main(void)
 		.param_p = NULL};
 	TimerInit(&timer_mostrar);
 
-	/* Creacion de las tareas teclas mostrar y medicion */
+	/* Creacion de las tareas mostrar y medicion */
 	xTaskCreate(&mostrar, "mostrar", 2048, NULL, 5, &mostrar_task_handle);
 	xTaskCreate(&medicion, "medir", 2048, NULL, 5, &medir_task_handle);
 
-	/* Inicio los timers */
+	/* Inicializo los timers */
 	TimerStart(timer_medicion.timer);
 	TimerStart(timer_mostrar.timer);
 	
