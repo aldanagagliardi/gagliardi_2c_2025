@@ -36,13 +36,17 @@
 #include "led.h"
 #include "switch.h"
 #include "analog_io_mcu.h"
+#include "../../../../../../Users/Usuario/esp/v5.1.6/esp-idf/components/freertos/FreeRTOS-Kernel-SMP/portable/riscv/include/freertos/portmacro.h"
+#include <freertos/portmacro.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 
 /*==================[macros and definitions]=================================*/
 #define CONFIG_BLINK_PERIOD 1000  //delay mediciones de temperatura y humedad
 #define CONFIG_BLINK_PERIOD_2 5000  //delay mediciones de radiacion
 
 uint16_t rad;
-
+uint8_t teclas;
 /*==================[internal data definition]===============================*/
 float valorTemperatura =0;
 float valorHumedad=0;
@@ -59,7 +63,7 @@ static void mediciones(void *parametro)
 	LedOff(LED_2);
 	LedOff(LED_3);
 
-    dht11Read(valorTemperatura, valorHumedad);
+    dht11Read(&valorTemperatura, &valorHumedad);
 		
 	if(valorHumedad<85){  //si es menor al 85% de humedad no hay riesgo de nevada
 				UartSendString(UART_PC, " Temperatura: ");
@@ -68,43 +72,46 @@ static void mediciones(void *parametro)
 				UartSendString(UART_PC, (char *)UartItoa(valorHumedad,10));
 				UartSendString(UART_PC, " % ");
 		}
-	} else if(valorTemperatura>=0){
-			if (valorTemperatura=<2){
-        			UartSendString(UART_PC, " Temperatura: 10ºC - Húmedad: 70% ");
+	else { if(valorTemperatura > 0){ //si la humedad es mayor a 85% y las temperaturas estan entre 0 y 2°C hay riesgo de nevada
+			if (valorTemperatura < 3){
+        			UartSendString(UART_PC, " Temperatura: ");
 					UartSendString(UART_PC, (char *)UartItoa(valorTemperatura, 10));
 					UartSendString(UART_PC, " °C, Humedad: ");
 					UartSendString(UART_PC, (char *)UartItoa(valorHumedad,10));
-					UartSendString(UART_PC, " - RIESGO DE NEVADA ");
+					UartSendString(UART_PC, " % - RIESGO DE NEVADA ");
 			}
 	}
+	}
+	//delay para 1 segundos 
 	vTaskDelay(CONFIG_BLINK_PERIOD/ portTICK_PERIOD_MS);
-
 }
 
+
 /** @fn radiaciones
- * @brief compara la radiacion para dar aviso si hay riesgo de radiacion elevada. 
- */
+* @brief compara la radiacion para dar aviso si hay riesgo de radiacion elevada. 
+*/
 static void radiaciones(void *parametro)
 {
+	// apago los leds para que no haya error de que alguno quede prendido por error 
 	LedOff(LED_2);
 	LedOff(LED_3);
-	AnalogInputReadSingle(CH1, &rad); // VLectura valor leido
+	AnalogInputReadSingle(CH1, &rad); // rad valor leido
 
-	if (rad>0){
-		if(rad<40){
-			if(valorHumedad>85 && valorTemperatura>=0 && valorTemperatura=<2){
+	if (rad > 0){
+		if(rad < 40){
+			if(valorHumedad > 85 && valorTemperatura => 0 && valorTemperatura <3 ){
 				LedOn(LED_3);
 			}
 		}
-	}else if(rad>40){
-		UartSendString(UART_PC, "Radiacion: ");
+	}else if(rad > 40){
+		UartSendString(UART_PC, "Radiacion: "); //muestro la leyenda pedida "RADIACION XVALOR mR/h-Radiacion elevada"
 		UartSendString(UART_PC, (char *)UartItoa(rad, 10));
 		UartSendString(UART_PC, "mR/h-RADIACION ELEVADA");
-		LedOn(LED_2);
+		LedOn(LED_2); //enciendo led amarillo 
 			
 	}
-		
-	vTaskDelay(CONFIG_BLINK_PERIOD_2/ portTICK_PERIOD_MS);
+	//delay para los 5segundos 
+	vTaskDelay(CONFIG_BLINK_PERIOD_2/ portTICK_PERIOD_MS); 
 }
 /*==================[external functions definition]==========================*/
 void app_main(void){
@@ -112,8 +119,7 @@ void app_main(void){
 	LedsInit();
 	dht11Init(GPIO_3);
 	SwitchesInit();
-
-	SwitchActivInt(SWITCH_1, tecla1, NULL);
+	AnalogOutputInit();
 
 	serial_config_t my_uart = {
 		.port = UART_PC,
@@ -130,9 +136,20 @@ void app_main(void){
 		.sample_frec = 0};
 
 	AnalogInputInit(&miestructura);
-	AnalogOutputInit();
-
-	xTaskCreate(&mediciones, "medir", 2048, NULL, 5, &medir_task_handle);
-	xTaskCreate(&radiaciones, "medir", 2048, NULL, 5, &medir_task_handle);
+	
+	while(1) {
+	teclas  = SwitchesRead();
+	switch(teclas){
+    		case SWITCH_1:
+				xTaskCreate(&mediciones, "medir", 2048, NULL, 5, &medir_task_handle);
+				xTaskCreate(&radiaciones, "medir", 2048, NULL, 5, &medir_task_handle);
+			break;
+    		case SWITCH_2:
+				 // se apaga el dispositivo 
+    		break;
+    	}
+	}
 }
+
+
 /*==================[end of file]============================================*/
