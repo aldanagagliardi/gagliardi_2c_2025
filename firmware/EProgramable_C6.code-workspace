@@ -50,6 +50,9 @@
         },
         {
             "path": "projects/guia_proyecto3"
+        },
+        {
+            "path": "projects/examen"
         }
     ],
     "settings": {
