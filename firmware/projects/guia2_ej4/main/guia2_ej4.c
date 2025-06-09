@@ -51,7 +51,7 @@
 
 /** @def CONFIG_BLINK_PERIOD_MEDICION_uS
  *  @brief Tiempo de espera para la lectura, escritura de las mediciones en el LCD
- *         y actualizacion de los LEDS, en ms 
+ *         y actualizacion de los LEDS
  */
 #define CONFIG_BLINK_PERIOD_MEDICION_uS 2000
 
@@ -72,13 +72,12 @@ unsigned char ECG[] = {
 /*==================[internal data definition]===============================*/
 
 /** @fn TimerA
- * @brief Timer que controla la Tarea-Medicion
+ * @brief Timer que envia una notificacion a la tarea asociada a medir
  */
 
 void TimerA(void *parametro)
 {
 	vTaskNotifyGiveFromISR(medir_task_handle, pdFALSE);
-	/* Envía una notificación a la tarea asociada a medir */
 }
 
 /*==================[internal functions declaration]=========================*/
@@ -137,7 +136,7 @@ void app_main(void)
 
 	xTaskCreate(&lectura, "medir", 4096, NULL, 5, &medir_task_handle);
 
-	/* Inicio los timers */
+	/* Inicializo los timers */
 	TimerStart(timer_medicion.timer);
 }
 /*==================[end of file]============================================*/

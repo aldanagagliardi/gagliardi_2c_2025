@@ -44,6 +44,12 @@
         },
         {
             "path": "projects/guia2_ej4"
+        },
+        {
+            "path": "projects/ej_bluetooth_ledrgb"
+        },
+        {
+            "path": "projects/guia_proyecto3"
         }
     ],
     "settings": {
@@ -98,7 +104,9 @@
             "ili9341.h": "c",
             "soc_caps.h": "c",
             "mpu6050.h": "c",
-            "i2c_mcu.h": "c"
+            "i2c_mcu.h": "c",
+            "rope": "c",
+            "regex": "c"
         },
     },
     "tasks": {
