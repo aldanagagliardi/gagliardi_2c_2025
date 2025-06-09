@@ -65,15 +65,15 @@ static void mediciones(void *parametro)
 
     dht11Read(&valorTemperatura, &valorHumedad);
 		
-	if(valorHumedad<85.0){  //si es menor al 85% de humedad no hay riesgo de nevada
+	if(valorHumedad<85){  //si es menor al 85% de humedad no hay riesgo de nevada
 				UartSendString(UART_PC, " Temperatura: ");
 				UartSendString(UART_PC, (char *)UartItoa(valorTemperatura, 10));
 				UartSendString(UART_PC, " °C, Humedad: ");
 				UartSendString(UART_PC, (char *)UartItoa(valorHumedad,10));
 				UartSendString(UART_PC, " % ");
 		}
-	else { if(valorTemperatura > 0.0){ //si la humedad es mayor a 85% y las temperaturas estan entre 0 y 2°C hay riesgo de nevada
-				if (valorTemperatura < 3.0){
+	else { if(valorTemperatura > 0){ //si la humedad es mayor a 85% y las temperaturas estan entre 0 y 2°C hay riesgo de nevada
+				if (valorTemperatura < 3){
         			UartSendString(UART_PC, " Temperatura: ");
 					UartSendString(UART_PC, (char *)UartItoa(valorTemperatura, 10));
 					UartSendString(UART_PC, " °C, Humedad: ");
@@ -99,7 +99,7 @@ static void radiaciones(void *parametro)
 
 	if (rad > 0){
 		if(rad < 40){
-			if(valorHumedad > 85.0 && valorTemperatura => 0.0 && valorTemperatura <3.0 ){
+			if(valorHumedad > 85 && valorTemperatura > 0 && valorTemperatura <3  ){
 				LedOn(LED_3);
 			}
 		}
