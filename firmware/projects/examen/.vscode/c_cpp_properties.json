@@ -8,7 +8,8 @@
                 "${config:idf.espIdfPathWin}/components/**",
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/../../drivers/microcontroller/**",
-                "${workspaceFolder}/../../drivers/devices/**"
+                "${workspaceFolder}/../../drivers/devices/**",
+                "C:/Repositorio/gagliardi_2c_2025/firmware/drivers/microcontroller/inc"
             ],
             "browse": {
                 "path": [
@@ -20,7 +21,9 @@
                 ],
                 "limitSymbolsToIncludedHeaders": false
             },
-            "compileCommands": "${workspaceFolder}/build/compile_commands.json"
+            "compileCommands": [
+                "${workspaceFolder}/build/compile_commands.json"
+            ]
         }
     ],
     "version": 4
