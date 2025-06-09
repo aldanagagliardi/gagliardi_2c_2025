@@ -65,15 +65,15 @@ static void mediciones(void *parametro)
 
     dht11Read(&valorTemperatura, &valorHumedad);
 		
-	if(valorHumedad<85){  //si es menor al 85% de humedad no hay riesgo de nevada
+	if(valorHumedad<85.0){  //si es menor al 85% de humedad no hay riesgo de nevada
 				UartSendString(UART_PC, " Temperatura: ");
 				UartSendString(UART_PC, (char *)UartItoa(valorTemperatura, 10));
 				UartSendString(UART_PC, " °C, Humedad: ");
 				UartSendString(UART_PC, (char *)UartItoa(valorHumedad,10));
 				UartSendString(UART_PC, " % ");
 		}
-	else { if(valorTemperatura > 0){ //si la humedad es mayor a 85% y las temperaturas estan entre 0 y 2°C hay riesgo de nevada
-			if (valorTemperatura < 3){
+	else { if(valorTemperatura > 0.0){ //si la humedad es mayor a 85% y las temperaturas estan entre 0 y 2°C hay riesgo de nevada
+				if (valorTemperatura < 3.0){
         			UartSendString(UART_PC, " Temperatura: ");
 					UartSendString(UART_PC, (char *)UartItoa(valorTemperatura, 10));
 					UartSendString(UART_PC, " °C, Humedad: ");
@@ -82,7 +82,7 @@ static void mediciones(void *parametro)
 			}
 	}
 	}
-	//delay para 1 segundos 
+	//delay para 1 segundos entre cada medicion de temperatura y humedad
 	vTaskDelay(CONFIG_BLINK_PERIOD/ portTICK_PERIOD_MS);
 }
 
@@ -99,7 +99,7 @@ static void radiaciones(void *parametro)
 
 	if (rad > 0){
 		if(rad < 40){
-			if(valorHumedad > 85 && valorTemperatura => 0 && valorTemperatura <3 ){
+			if(valorHumedad > 85.0 && valorTemperatura => 0.0 && valorTemperatura <3.0 ){
 				LedOn(LED_3);
 			}
 		}
@@ -107,10 +107,10 @@ static void radiaciones(void *parametro)
 		UartSendString(UART_PC, "Radiacion: "); //muestro la leyenda pedida "RADIACION XVALOR mR/h-Radiacion elevada"
 		UartSendString(UART_PC, (char *)UartItoa(rad, 10));
 		UartSendString(UART_PC, "mR/h-RADIACION ELEVADA");
-		LedOn(LED_2); //enciendo led amarillo 
+		LedOn(LED_2); //enciendo LED amarillo 
 			
 	}
-	//delay para los 5segundos 
+	//delay para los 5 segundos entre cada medicion de radiacion
 	vTaskDelay(CONFIG_BLINK_PERIOD_2/ portTICK_PERIOD_MS); 
 }
 /*==================[external functions definition]==========================*/
