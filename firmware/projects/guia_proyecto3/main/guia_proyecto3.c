@@ -50,6 +50,8 @@
 
 /*==================[macros and definitions]=================================*/
 #define CONFIG_BLINK_PERIOD 500
+#define CONFIG_BLINK_PERIOD_2 300
+#define CONFIG_BLINK_PERIOD_3 200
 #define LED_BT	LED_1
 #define ECHO_1 GPIO_2
 #define TRIGGER_1 GPIO_3
@@ -72,31 +74,41 @@ static void medidaParalela(void *parametro)
 	while (true)
 	{
 		HcSr04Init(ECHO_1, TRIGGER_1);
-		valorParalelo = HcSr04ReadDistanceInCentimeters(); // lectura del sensor
+		valorParalelo = (HcSr04ReadDistanceInCentimeters()+HcSr04ReadDistanceInCentimeters()+HcSr04ReadDistanceInCentimeters()+HcSr04ReadDistanceInCentimeters()+HcSr04ReadDistanceInCentimeters())/5; // lectura del sensor
         
         if(valorParalelo < 10){ //comparar si es menor a 10cm 
             BleSendString("*A"); //*A indica el sonido que se escuchara
+             vTaskDelay(CONFIG_BLINK_PERIOD_3/ portTICK_PERIOD_MS);
         }else if(valorParalelo < 20){
                 BleSendString("*B");
+                vTaskDelay(CONFIG_BLINK_PERIOD_3/ portTICK_PERIOD_MS);
         }else if(valorParalelo < 30){
                 BleSendString("*C");
+                 vTaskDelay(CONFIG_BLINK_PERIOD_3/ portTICK_PERIOD_MS);
         }else if(valorParalelo < 40){
                 BleSendString("*D");  
+                vTaskDelay(CONFIG_BLINK_PERIOD_2/ portTICK_PERIOD_MS);
         } else if(valorParalelo < 50 ){
                 BleSendString("*E"); 
+                vTaskDelay(CONFIG_BLINK_PERIOD_2/ portTICK_PERIOD_MS);
         } else if(valorParalelo < 60 ){
                 BleSendString("*F"); 
+                vTaskDelay(CONFIG_BLINK_PERIOD_2/ portTICK_PERIOD_MS);
         } else if(valorParalelo < 70 ){
                 BleSendString("*G"); 
+                vTaskDelay(CONFIG_BLINK_PERIOD_2/ portTICK_PERIOD_MS);
         } else if(valorParalelo < 80 ){
                 BleSendString("*H"); 
+                vTaskDelay(CONFIG_BLINK_PERIOD/ portTICK_PERIOD_MS);
         } else if(valorParalelo < 90 ){
                 BleSendString("*I"); 
+                vTaskDelay(CONFIG_BLINK_PERIOD/ portTICK_PERIOD_MS);
         } else if(valorParalelo < 100 ){
                 BleSendString("*J"); 
+                vTaskDelay(CONFIG_BLINK_PERIOD/ portTICK_PERIOD_MS);
         } 
 
-        vTaskDelay(CONFIG_BLINK_PERIOD/ portTICK_PERIOD_MS);
+       // vTaskDelay(CONFIG_BLINK_PERIOD/ portTICK_PERIOD_MS);
 	}
 }
 
@@ -107,9 +119,13 @@ static void medidaProfundidad(void *parametro)
 		HcSr04Init(ECHO_2, TRIGGER_2);
 		valorProfundidad = HcSr04ReadDistanceInCentimeters(); // lectura del sensor
     
-        if(valorProfundidad>7){
+        if(valorProfundidad>10){
+            LedOn(LED_2);
             BleSendString("*K"); //*K indica el sonido que se escuchara
+        } else{
+            LedOff(LED_2);
         } //comparo si es mayor a 7cm 
+       
         vTaskDelay(CONFIG_BLINK_PERIOD/ portTICK_PERIOD_MS);
 	}
 }
@@ -126,7 +142,6 @@ void app_main(void){
 
     LedsInit();
     BleInit(&ble_configuration);
-  //  HcSr04Init(GPIO_3, GPIO_2);
 
     xTaskCreate(&medidaParalela, "medir", 2048, NULL, 5, &medir_task_handle);
     xTaskCreate(&medidaProfundidad, "medir2", 2048, NULL, 5, &medir2_task_handle);
